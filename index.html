@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Achadinhos</title>
+<meta name="theme-color" content="#B5124F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{--accent:#B5124F;--ink:#2a1720;--muted:#8a6d79;--bg:#fff7fa;--line:#f3dbe5;--r:18px}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
+img{display:block;max-width:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+button:disabled{opacity:.4;cursor:default}
+a{color:inherit}
+.pub,.adm{max-width:560px;margin:0 auto;padding:0 16px 48px}
+
+/* ---------- PÁGINA PÚBLICA ---------- */
+.hero{text-align:center;padding:64px 8px 18px;position:relative;isolation:isolate}
+.hero::before{content:'';position:absolute;top:0;left:-16px;right:-16px;height:120px;background:linear-gradient(160deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#ffc2d6));border-radius:0 0 36px 36px;z-index:-1}
+.avatar{width:104px;height:104px;border-radius:50%;margin:0 auto 12px;border:4px solid #fff;background:#fff;overflow:hidden;box-shadow:0 8px 24px rgba(120,20,60,.18);display:grid;place-items:center}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.avatar span{font-family:Fraunces,serif;font-size:44px;font-weight:800;color:var(--accent)}
+.hero h1{font-family:Fraunces,serif;font-weight:800;font-size:28px;line-height:1.1}
+.handle{color:var(--muted);font-size:14px;margin-top:4px}
+.bio{margin:10px auto 0;max-width:380px;line-height:1.45;font-size:15px;white-space:pre-line}
+.cta-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border-radius:999px;font-weight:700;text-decoration:none;font-size:15px;line-height:1.1}
+.btn.sm{padding:8px 14px;font-size:13px}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-ghost{background:#fff;border:1.5px solid var(--line)}
+.btn-danger{background:#fff;color:#c62828;border:1.5px solid #f5c2c2}
+.full{width:100%}
+.searchbar{margin-top:8px}
+.searchbar input{width:100%;padding:14px 18px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:16px;outline:none;-webkit-appearance:none}
+.searchbar input:focus{border-color:var(--accent)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:8px 14px;border-radius:999px;background:#fff;border:1.5px solid var(--line);white-space:nowrap;font-size:14px;font-weight:500}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
+.tile{position:relative;aspect-ratio:4/5;border-radius:12px;overflow:hidden;background:var(--line)}
+.tile img{width:100%;height:100%;object-fit:cover}
+.tile:active{transform:scale(.97)}
+.num{position:absolute;top:6px;left:6px;background:#fff;color:var(--accent);font-weight:800;font-size:13px;padding:3px 9px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.noimg{display:grid;place-items:center;height:100%;padding:8px;font-size:12px;text-align:center;color:var(--muted)}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0;list-style:none}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:32px;line-height:1.5}
+
+.sheet-wrap{position:fixed;inset:0;background:rgba(30,10,20,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;animation:fade .2s}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:24px 24px 0 0;padding:20px 16px calc(24px + env(safe-area-inset-bottom));position:relative;animation:up .25s ease-out}
+.close{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:#fff;font-size:22px;line-height:1;border:1px solid var(--line)}
+.sheet-head{display:flex;gap:14px;align-items:center;margin-bottom:16px;padding-right:40px}
+.sheet-head img{width:72px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0}
+.badge{display:inline-block;background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+.sheet-head h2{font-family:Fraunces,serif;font-size:20px;margin-top:6px;line-height:1.2}
+.small-link{font-size:13px;color:var(--muted);display:inline-block;margin-top:4px}
+.prods{list-style:none;display:flex;flex-direction:column;gap:10px}
+.prod{display:flex;gap:12px;align-items:center;background:#fff;border-radius:16px;padding:10px;border:1px solid var(--line)}
+.pimg{width:60px;height:60px;border-radius:12px;overflow:hidden;flex-shrink:0;background:var(--line);display:grid;place-items:center;font-weight:800;color:var(--accent)}
+.pimg img{width:100%;height:100%;object-fit:cover}
+.pinfo{flex:1;min-width:0}
+.plat{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+.pname{font-weight:500;font-size:15px;margin-top:4px;line-height:1.3}
+.price{color:var(--accent);font-weight:700;font-size:14px;margin-top:2px}
+.coupon{margin-top:6px;font-size:12px;background:#fff1f6;border:1px dashed var(--accent);padding:4px 8px;border-radius:8px;text-align:left}
+.buy{background:var(--accent);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:10px 14px;border-radius:999px;flex-shrink:0}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+.loading{min-height:100vh;display:grid;place-items:center}
+.spin{width:36px;height:36px;border:4px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:rot .8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* ---------- PAINEL ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:16px 0}
+.topbar h1{font-family:Fraunces,serif;font-size:21px}
+.topbar .r{display:flex;gap:6px}
+.tabs{display:flex;background:#fff;border-radius:999px;padding:4px;border:1px solid var(--line);margin-bottom:16px}
+.tabs button{flex:1;padding:10px;border-radius:999px;font-weight:700;color:var(--muted)}
+.tabs button.on{background:var(--accent);color:#fff}
+.stats{color:var(--muted);font-size:13px;text-align:center;margin:10px 0 0}
+.alist{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.arow{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px;text-align:left;width:100%}
+.arow img,.arow .ph{width:52px;height:65px;border-radius:10px;object-fit:cover;background:var(--line);flex-shrink:0}
+.arow .t{flex:1;min-width:0}
+.arow small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.arow.off{opacity:.55}
+.arow .go{color:var(--muted);font-size:22px}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.f{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:12px 0 6px}
+.in{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:16px;outline:none;-webkit-appearance:none}
+.in:focus{border-color:var(--accent)}
+textarea.in{min-height:84px;resize:vertical}
+input[type=color].in{height:48px;padding:4px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.4}
+.cover-up{display:flex;gap:14px;align-items:center}
+.cover-prev{width:80px;height:100px;border-radius:12px;background:var(--line) center/cover no-repeat;flex-shrink:0;display:grid;place-items:center;color:var(--muted);font-size:12px;text-align:center}
+.cover-prev.round{width:84px;height:84px;border-radius:50%}
+.upbtn{display:inline-block;padding:10px 14px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent);font-weight:700;font-size:14px;cursor:pointer;background:#fff}
+.upbtn.small{padding:7px 12px;font-size:13px}
+.upbtn input{display:none}
+.check{display:flex;gap:10px;align-items:center;margin-top:16px;font-weight:500}
+.check input{width:20px;height:20px;accent-color:var(--accent)}
+.linkbox{display:flex;gap:8px;align-items:center;justify-content:space-between;font-size:13px;background:#fff1f6;padding:10px 12px;border-radius:12px;margin-top:14px;word-break:break-all}
+.sec{font-family:Fraunces,serif;font-size:18px;margin:8px 0 2px}
+.pcard{border:1.5px solid var(--line);border-radius:16px;padding:12px;margin-top:10px;background:#fff}
+.phead{display:flex;justify-content:space-between;align-items:center}
+.phead b{color:var(--accent)}
+.phead small{color:var(--muted);font-weight:500;margin-left:6px}
+.ptools{display:flex;gap:4px}
+.ptools button{width:34px;height:34px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.pimg-up{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.mini{width:44px;height:44px;border-radius:10px;background:var(--line) center/cover no-repeat;flex-shrink:0}
+.linkbtn{color:var(--muted);text-decoration:underline;font-size:13px}
+.actions{display:flex;gap:10px;position:sticky;bottom:0;padding:16px 0 calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 35%);margin-top:8px}
+.login{padding-top:12vh}
+.ttl{font-family:Fraunces,serif;font-size:26px}
+.setup{padding:40px 20px;max-width:520px;margin:0 auto;line-height:1.6}
+.setup h1{font-family:Fraunces,serif;margin-bottom:12px}
+.setup code{background:#fff;padding:2px 6px;border-radius:6px;border:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading"><div class="spin"></div></div></div>
+<div id="toast"></div>
+<script>
+/* =========================================================
+   CONFIGURAÇÃO — só precisa mexer AQUI, uma única vez.
+   Cole a Project URL e a chave PÚBLICA (anon / publishable)
+   do seu projeto Supabase. NUNCA cole a chave secret/service_role.
+   ========================================================= */
+const SUPABASE_URL = 'https://nctrxkfjoexqtemywbxo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jdHJ4a2Zqb2V4cXRlbXl3YnhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzg0MTIsImV4cCI6MjEwNzc1NDQxMn0.lFEIx7q4bOaqdEK3kSFKZ27mmgg6i5PPwBf1lWYKuno';
+/* ========================================================= */
+
+const BUCKET = 'imagens';
+const PLATFORMS = {
+  shopee:{n:'Shopee',bg:'#EE4D2D',fg:'#fff'},
+  amazon:{n:'Amazon',bg:'#232F3E',fg:'#fff'},
+  mercadolivre:{n:'Mercado Livre',bg:'#FFE600',fg:'#2D3277'},
+  magalu:{n:'Magalu',bg:'#0086FF',fg:'#fff'},
+  shein:{n:'Shein',bg:'#111',fg:'#fff'},
+  tiktok:{n:'TikTok Shop',bg:'#111',fg:'#fff'},
+  outro:{n:'Loja',bg:'#8a6d79',fg:'#fff'}
+};
+const DEFAULT_SETTINGS = {name:'Leva, miga!',handle:'',bio:'',avatar_url:'',whatsapp_url:'',instagram_url:'',color:'#B5124F',footer:''};
+
+const $app = document.getElementById('app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const stripNull = o => Object.fromEntries(Object.entries(o||{}).filter(([,v]) => v !== null && v !== undefined));
+const configured = !SUPABASE_URL.includes('COLE_AQUI') && !SUPABASE_KEY.includes('COLE_AQUI');
+const sb = configured ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+let S = {settings:{...DEFAULT_SETTINGS}, posts:[], q:'', cat:'Todos'};
+let tab = 'posts';
+let E = null;
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function applyColor(c){
+  const col = /^#[0-9a-f]{6}$/i.test(c||'') ? c : '#B5124F';
+  document.documentElement.style.setProperty('--accent', col);
+  document.querySelector('meta[name=theme-color]').setAttribute('content', col);
+}
+function safeUrl(u){
+  u = String(u||'').trim();
+  if(!u) return '#';
+  if(/^javascript:/i.test(u)) return '#';
+  if(!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  return u;
+}
+function detectPlatform(u){
+  u = norm(u);
+  if(/shopee|shp\.ee/.test(u)) return 'shopee';
+  if(/amazon|amzn/.test(u)) return 'amazon';
+  if(/mercadoli[vb]re|meli\.la|mlb/.test(u)) return 'mercadolivre';
+  if(/magalu|magazineluiza|divulgador\.magalu/.test(u)) return 'magalu';
+  if(/shein/.test(u)) return 'shein';
+  if(/tiktok/.test(u)) return 'tiktok';
+  return null;
+}
+function sortProducts(p){ p.products = (p.products||[]).sort((a,b) => (a.position??0)-(b.position??0)); return p; }
+function postLink(n){ return location.origin + '/?post=' + n; }
+function bgStyle(url){ return url ? `background-image:url('${esc(url)}')` : ''; }
+
+async function compress(file, max){
+  const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('Não consegui ler essa imagem')); i.src = URL.createObjectURL(file); });
+  const sc = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+  const c = document.createElement('canvas');
+  c.width = Math.round(img.naturalWidth * sc); c.height = Math.round(img.naturalHeight * sc);
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+  URL.revokeObjectURL(img.src);
+  return await new Promise(r => c.toBlob(r, 'image/jpeg', 0.82));
+}
+async function uploadImg(file, folder, max){
+  const blob = await compress(file, max);
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+  const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType:'image/jpeg', upsert:false });
+  if(error) throw error;
+  return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
+function removeImg(url){
+  if(!url || !url.includes('/' + BUCKET + '/')) return;
+  const path = decodeURIComponent(url.split('/' + BUCKET + '/')[1].split('?')[0]);
+  sb.storage.from(BUCKET).remove([path]).catch(() => {});
+}
+
+/* ---------------- ROTAS ---------------- */
+function route(){
+  if(!configured) return renderSetup();
+  if(/admin/i.test(location.hash) || /\/admin\/?$/i.test(location.pathname) || /[?&]admin\b/i.test(location.search)) return adminRoute();
+  publicRoute();
+}
+window.addEventListener('hashchange', route);
+
+function renderSetup(){
+  $app.innerHTML = `<div class="setup"><h1>Quase lá ✨</h1>
+  <p>Abra este arquivo (<code>index.html</code>) e cole, lá no começo do código, a <b>Project URL</b> e a <b>chave pública</b> do seu projeto Supabase, no lugar de <code>COLE_AQUI</code>.</p></div>`;
+}
+
+/* ---------------- PÁGINA PÚBLICA ---------------- */
+async function publicRoute(){
+  $app.innerHTML = '<div class="loading"><div class="spin"></div></div>';
+  const [s, p] = await Promise.all([
+    sb.from('settings').select('*').eq('id',1).maybeSingle(),
+    sb.from('posts').select('*, products(*)').eq('active', true).order('number', {ascending:false})
+  ]);
+  if(s.data) S.settings = {...DEFAULT_SETTINGS, ...stripNull(s.data)};
+  S.posts = (p.data||[]).map(sortProducts);
+  renderPublic();
+  const n = new URLSearchParams(location.search).get('post');
+  if(n){ const post = S.posts.find(x => String(x.number) === n); if(post) openPost(post.id); }
+}
+
+function renderPublic(){
+  const st = S.settings;
+  applyColor(st.color);
+  document.title = st.name + ' • Achadinhos';
+  const cats = ['Todos', ...new Set(S.posts.map(p => p.category).filter(Boolean))];
+  const handle = (st.handle||'').replace(/^@/,'');
+  $app.innerHTML = `
+  <main class="pub">
+    <header class="hero">
+      <div class="avatar">${st.avatar_url ? `<img src="${esc(st.avatar_url)}" alt="">` : `<span>${esc((st.name||'?').charAt(0))}</span>`}</div>
+      <h1>${esc(st.name)}</h1>
+      ${handle ? `<p class="handle">@${esc(handle)}</p>` : ''}
+      ${st.bio ? `<p class="bio">${esc(st.bio)}</p>` : ''}
+      <div class="cta-row">
+        ${st.whatsapp_url ? `<a class="btn btn-accent" href="${esc(safeUrl(st.whatsapp_url))}" target="_blank" rel="noopener">💬 Entrar no grupo VIP</a>` : ''}
+        ${st.instagram_url ? `<a class="btn btn-ghost" href="${esc(safeUrl(st.instagram_url))}" target="_blank" rel="noopener">Instagram</a>` : ''}
+      </div>
+    </header>
+    <div class="searchbar"><input id="q" type="search" inputmode="search" placeholder="🔎 Busque pelo nº do post ou produto" value="${esc(S.q)}"></div>
+    ${cats.length > 2 ? `<div class="chips">${cats.map(c => `<button class="chip ${c===S.cat?'on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}</div>` : ''}
+    <section id="grid" class="grid"></section>
+    ${st.footer ? `<footer class="foot">${esc(st.footer)}</footer>` : ''}
+  </main>`;
+  document.getElementById('q').addEventListener('input', e => { S.q = e.target.value; renderGrid(); });
+  document.querySelectorAll('.chip').forEach(b => b.onclick = () => {
+    S.cat = b.dataset.cat;
+    document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b));
+    renderGrid();
+  });
+  renderGrid();
+}
+
+function filtered(){
+  const q = norm(S.q).trim().replace(/^(?:#|n[º°o]?\.?\s*|post\s*)(?=\d)/, '');
+  return S.posts.filter(p => {
+    if(S.cat !== 'Todos' && p.category !== S.cat) return false;
+    if(!q) return true;
+    if(/^\d+$/.test(q)) return String(p.number).startsWith(q);
+    const hay = norm([p.title, p.category, ...p.products.map(x => x.name)].join(' '));
+    return hay.includes(q);
+  });
+}
+
+function renderGrid(){
+  const g = document.getElementById('grid');
+  if(!S.posts.length){ g.innerHTML = '<p class="empty">Em breve os achadinhos aparecem aqui ✨</p>'; return; }
+  const list = filtered();
+  if(!list.length){ g.innerHTML = '<p class="empty">Nenhum post encontrado. Confere o número? 🔎</p>'; return; }
+  g.innerHTML = list.map(p => `<button class="tile" data-id="${p.id}" aria-label="Post ${p.number}">
+    ${p.cover_url ? `<img src="${esc(p.cover_url)}" loading="lazy" alt="">` : `<div class="noimg">${esc(p.title||'')}</div>`}
+    <span class="num">${p.number}</span></button>`).join('');
+  g.querySelectorAll('.tile').forEach(b => b.onclick = () => openPost(b.dataset.id));
+}
+
+function prodItem(x, i){
+  const pl = PLATFORMS[x.platform] || PLATFORMS.outro;
+  return `<li class="prod">
+    <div class="pimg">${x.image_url ? `<img src="${esc(x.image_url)}" loading="lazy" alt="">` : `<span>${i+1}</span>`}</div>
+    <div class="pinfo">
+      <span class="plat" style="background:${pl.bg};color:${pl.fg}">${pl.n}</span>
+      <p class="pname">${esc(x.name)}</p>
+      ${x.price ? `<p class="price">${esc(x.price)}</p>` : ''}
+      ${x.coupon ? `<button class="coupon" data-copy="${esc(x.coupon)}">🎟️ Cupom <b>${esc(x.coupon)}</b> · copiar</button>` : ''}
+    </div>
+    <a class="buy" href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener sponsored" data-click="${x.id}">Comprar</a>
+  </li>`;
+}
+
+function openPost(id){
+  const p = S.posts.find(x => x.id === id); if(!p) return;
+  history.replaceState(null, '', '?post=' + p.number);
+  const el = document.createElement('div');
+  el.className = 'sheet-wrap';
+  el.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">
+    <button class="close" aria-label="Fechar">×</button>
+    <div class="sheet-head">
+      ${p.cover_url ? `<img src="${esc(p.cover_url)}" alt="">` : ''}
+      <div><span class="badge">Post ${p.number}</span>
+        <h2>${esc(p.title || 'Achadinhos')}</h2>
+        ${p.instagram_url ? `<a class="small-link" href="${esc(safeUrl(p.instagram_url))}" target="_blank" rel="noopener">Ver post no Instagram ↗</a>` : ''}
+      </div>
+    </div>
+    <ul class="prods">${p.products.map(prodItem).join('') || '<li class="empty">Links em breve! 💕</li>'}</ul>
+  </div>`;
+  document.body.appendChild(el);
+  document.body.style.overflow = 'hidden';
+  const close = () => { el.remove(); document.body.style.overflow = ''; history.replaceState(null, '', location.pathname); };
+  el.addEventListener('click', e => { if(e.target === el) close(); });
+  el.querySelector('.close').onclick = close;
+  el.querySelectorAll('[data-click]').forEach(a => a.addEventListener('click', () => { sb.rpc('increment_click', {pid: a.dataset.click}).then(() => {}); }));
+  el.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => {
+    try { await navigator.clipboard.writeText(b.dataset.copy); toast('Cupom copiado! 🎉'); }
+    catch { toast('Cupom: ' + b.dataset.copy); }
+  });
+}
+
+/* ---------------- PAINEL ---------------- */
+async function adminRoute(){
+  $app.innerHTML = '<div class="loading"><div class="spin"></div></div>';
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session) return renderLogin();
+  await loadAdmin();
+  renderAdmin();
+}
+
+async function loadAdmin(){
+  const [s, p] = await Promise.all([
+    sb.from('settings').select('*').eq('id',1).maybeSingle(),
+    sb.from('posts').select('*, products(*)').order('number', {ascending:false})
+  ]);
+  if(p.error) toast('Erro ao carregar: ' + p.error.message);
+  S.settings = {...DEFAULT_SETTINGS, ...stripNull(s.data)};
+  S.posts = (p.data||[]).map(sortProducts);
+  applyColor(S.settings.color);
+}
+
+function renderLogin(){
+  document.title = 'Painel';
+  $app.innerHTML = `<main class="adm login"><form class="card" id="lf">
+    <h1 class="ttl">Painel ✨</h1>
+    <p class="hint">Entre com o e-mail e a senha que você criou no Supabase.</p>
+    <label class="f">E-mail</label><input class="in" id="em" type="email" autocomplete="username" required>
+    <label class="f">Senha</label><input class="in" id="pw" type="password" autocomplete="current-password" required>
+    <button class="btn btn-accent full" style="margin-top:18px" id="go">Entrar</button>
+  </form></main>`;
+  document.getElementById('lf').onsubmit = async e => {
+    e.preventDefault();
+    const btn = document.getElementById('go'); btn.disabled = true; btn.textContent = 'Entrando...';
+    const { error } = await sb.auth.signInWithPassword({ email: document.getElementById('em').value.trim(), password: document.getElementById('pw').value });
+    if(error){ toast('E-mail ou senha incorretos'); btn.disabled = false; btn.textContent = 'Entrar'; return; }
+    adminRoute();
+  };
+}
+
+function renderAdmin(){
+  document.title = 'Painel • ' + S.settings.name;
+  $app.innerHTML = `<main class="adm">
+    <div class="topbar"><h1>Painel ✨</h1>
+      <div class="r"><a class="btn btn-ghost sm" href="/" target="_blank" rel="noopener">Ver página</a><button class="btn btn-ghost sm" id="out">Sair</button></div></div>
+    <div class="tabs"><button data-t="posts" class="${tab==='posts'?'on':''}">Posts</button><button data-t="perfil" class="${tab==='perfil'?'on':''}">Perfil</button></div>
+    <div id="tabc"></div>
+  </main>`;
+  document.getElementById('out').onclick = async () => { await sb.auth.signOut(); renderLogin(); };
+  document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { tab = b.dataset.t; renderAdmin(); });
+  tab === 'posts' ? renderPostsTab() : renderProfileTab();
+}
+
+function renderPostsTab(){
+  const c = document.getElementById('tabc');
+  const totalClicks = S.posts.reduce((a,p) => a + p.products.reduce((b,x) => b + (x.clicks||0), 0), 0);
+  c.innerHTML = `<button class="btn btn-accent full" id="new">+ Novo post</button>
+    <p class="stats">${S.posts.length} posts · ${totalClicks} cliques nos links</p>
+    <div class="alist">${S.posts.map(p => {
+      const clicks = p.products.reduce((b,x) => b + (x.clicks||0), 0);
+      return `<button class="arow ${p.active?'':'off'}" data-id="${p.id}">
+        ${p.cover_url ? `<img src="${esc(p.cover_url)}" alt="">` : '<div class="ph"></div>'}
+        <div class="t"><b>Post ${p.number}</b>${p.title ? ' · ' + esc(p.title) : ''}
+        <small>${p.products.length} produto${p.products.length===1?'':'s'} · ${clicks} clique${clicks===1?'':'s'}${p.active?'':' · oculto'}</small></div>
+        <span class="go">›</span></button>`;
+    }).join('') || '<p class="empty">Nenhum post ainda. Toque em "+ Novo post" 💕</p>'}</div>`;
+  document.getElementById('new').onclick = () => renderEditor(null);
+  c.querySelectorAll('.arow').forEach(b => b.onclick = () => renderEditor(S.posts.find(p => p.id === b.dataset.id)));
+}
+
+function renderProfileTab(){
+  const st = S.settings;
+  const c = document.getElementById('tabc');
+  c.innerHTML = `<div class="card">
+    <div class="cover-up"><div class="cover-prev round" id="aprev" style="${bgStyle(st.avatar_url)}">${st.avatar_url?'':'Sem foto'}</div>
+      <label class="upbtn">📷 Foto de perfil<input type="file" accept="image/*" id="afile"></label></div>
+    <label class="f">Nome</label><input class="in" data-s="name" value="${esc(st.name)}">
+    <label class="f">@ do Instagram</label><input class="in" data-s="handle" value="${esc(st.handle)}" placeholder="levamiga">
+    <label class="f">Bio</label><textarea class="in" data-s="bio">${esc(st.bio)}</textarea>
+    <label class="f">Link do grupo VIP (WhatsApp)</label><input class="in" type="url" data-s="whatsapp_url" value="${esc(st.whatsapp_url)}" placeholder="https://chat.whatsapp.com/...">
+    <label class="f">Link do Instagram</label><input class="in" type="url" data-s="instagram_url" value="${esc(st.instagram_url)}" placeholder="https://instagram.com/...">
+    <label class="f">Cor principal</label><input class="in" type="color" data-s="color" value="${esc(st.color)}">
+    <label class="f">Aviso no rodapé</label><textarea class="in" data-s="footer">${esc(st.footer)}</textarea>
+    <button class="btn btn-accent full" id="ssave" style="margin-top:18px">Salvar perfil</button>
+  </div>`;
+  const draft = {...st};
+  c.querySelectorAll('[data-s]').forEach(i => i.addEventListener('input', () => { draft[i.dataset.s] = i.value; if(i.dataset.s==='color') applyColor(i.value); }));
+  document.getElementById('afile').onchange = async e => {
+    const f = e.target.files[0]; if(!f) return;
+    toast('Enviando foto...');
+    try { draft.avatar_url = await uploadImg(f, 'perfil', 500); const a = document.getElementById('aprev'); a.style.backgroundImage = `url('${draft.avatar_url}')`; a.textContent = ''; toast('Foto pronta! Agora é só salvar.'); }
+    catch(err){ toast('Erro: ' + err.message); }
+  };
+  document.getElementById('ssave').onclick = async e => {
+    e.target.disabled = true;
+    const row = {id:1, name:draft.name||'Leva, miga!', handle:draft.handle||null, bio:draft.bio||null, avatar_url:draft.avatar_url||null,
+      whatsapp_url:draft.whatsapp_url||null, instagram_url:draft.instagram_url||null, color:draft.color||null, footer:draft.footer||null, updated_at:new Date().toISOString()};
+    const { error } = await sb.from('settings').upsert(row);
+    e.target.disabled = false;
+    if(error) return toast('Erro ao salvar: ' + error.message);
+    if(st.avatar_url && st.avatar_url !== draft.avatar_url) removeImg(st.avatar_url);
+    S.settings = {...DEFAULT_SETTINGS, ...stripNull(row)};
+    toast('Perfil salvo! ✨');
+  };
+}
+
+const blankProd = () => ({id:null, name:'', url:'', platform:'shopee', price:'', coupon:'', image_url:''});
+
+function renderEditor(post){
+  E = post ? JSON.parse(JSON.stringify(post)) : {id:null, number: Math.max(0, ...S.posts.map(p => p.number)) + 1, title:'', category:'', cover_url:'', instagram_url:'', active:true, products:[]};
+  E._origCover = E.cover_url;
+  if(!E.products.length) E.products.push(blankProd());
+  const cats = [...new Set(S.posts.map(p => p.category).filter(Boolean))];
+  window.scrollTo(0,0);
+  $app.innerHTML = `<main class="adm">
+    <div class="topbar"><button class="btn btn-ghost sm" id="back">‹ Voltar</button><h1>${E.id ? 'Editar post' : 'Novo post'}</h1><span style="width:60px"></span></div>
+    <div class="card">
+      <div class="cover-up">
+        <div class="cover-prev" id="cprev" style="${bgStyle(E.cover_url)}">${E.cover_url ? '' : 'Sem capa'}</div>
+        <div><label class="upbtn">📷 ${E.cover_url ? 'Trocar capa' : 'Escolher capa'}<input type="file" accept="image/*" id="cfile"></label>
+        <p class="hint">É a foto que aparece na grade da página.</p></div>
+      </div>
+      <div class="row2">
+        <div><label class="f">Nº do post</label><input class="in" type="number" inputmode="numeric" data-k="number" value="${esc(E.number)}"></div>
+        <div><label class="f">Categoria</label><input class="in" list="cats" data-k="category" value="${esc(E.category||'')}" placeholder="Ex: Skincare"><datalist id="cats">${cats.map(c => `<option value="${esc(c)}">`).join('')}</datalist></div>
+      </div>
+      <label class="f">Título</label><input class="in" data-k="title" value="${esc(E.title||'')}" placeholder="Ex: Skincare coreano baratinho">
+      <label class="f">Link do post no Instagram (opcional)</label><input class="in" type="url" data-k="instagram_url" value="${esc(E.instagram_url||'')}" placeholder="https://instagram.com/p/...">
+      <label class="check"><input type="checkbox" id="active" ${E.active ? 'checked' : ''}> Mostrar na página</label>
+      ${E.id ? `<div class="linkbox"><span>Link direto: <b>${esc(postLink(E.number))}</b></span><button class="upbtn small" id="copylink">Copiar</button></div>` : ''}
+    </div>
+    <h3 class="sec">Produtos</h3>
+    <div id="plist"></div>
+    <button class="btn btn-ghost full" id="addp" style="margin-top:12px">+ Adicionar produto</button>
+    <div class="actions">${E.id ? '<button class="btn btn-danger" id="del">Excluir</button>' : ''}<button class="btn btn-accent" style="flex:1" id="save">Salvar post</button></div>
+  </main>`;
+
+  document.getElementById('back').onclick = () => renderAdmin();
+  document.querySelectorAll('[data-k]').forEach(i => i.addEventListener('input', () => { E[i.dataset.k] = i.value; }));
+  document.getElementById('active').onchange = e => { E.active = e.target.checked; };
+  document.getElementById('cfile').onchange = async e => {
+    const f = e.target.files[0]; if(!f) return;
+    toast('Enviando capa...');
+    try { E.cover_url = await uploadImg(f, 'capas', 1080); const cp = document.getElementById('cprev'); cp.style.backgroundImage = `url('${E.cover_url}')`; cp.textContent = ''; toast('Capa pronta! 📸'); }
+    catch(err){ toast('Erro: ' + err.message); }
+  };
+  const cl = document.getElementById('copylink');
+  if(cl) cl.onclick = async () => { try { await navigator.clipboard.writeText(postLink(E.number)); toast('Link copiado!'); } catch { toast(postLink(E.number)); } };
+  document.getElementById('addp').onclick = () => { E.products.push(blankProd()); renderProds(); document.querySelector('#plist .pcard:last-child [data-p=name]').focus(); };
+  document.getElementById('save').onclick = savePost;
+  const del = document.getElementById('del');
+  if(del) del.onclick = deletePost;
+  renderProds();
+}
+
+function renderProds(){
+  const el = document.getElementById('plist');
+  el.innerHTML = E.products.map((x, i) => `<div class="pcard" data-i="${i}">
+    <div class="phead"><b>Produto ${i+1}${x.clicks ? `<small>${x.clicks} cliques</small>` : ''}</b>
+      <div class="ptools"><button data-a="up" ${i===0?'disabled':''} aria-label="Subir">↑</button><button data-a="down" ${i===E.products.length-1?'disabled':''} aria-label="Descer">↓</button><button data-a="rm" aria-label="Remover">🗑</button></div></div>
+    <label class="f">Nome</label><input class="in" data-p="name" value="${esc(x.name)}" placeholder="Ex: Protetor solar coreano">
+    <label class="f">Link de afiliado</label><input class="in" type="url" data-p="url" value="${esc(x.url)}" placeholder="Cole o link aqui">
+    <div class="row2">
+      <div><label class="f">Loja</label><select class="in" data-p="platform">${Object.entries(PLATFORMS).map(([k,v]) => `<option value="${k}" ${x.platform===k?'selected':''}>${v.n}</option>`).join('')}</select></div>
+      <div><label class="f">Preço (opcional)</label><input class="in" data-p="price" value="${esc(x.price||'')}" placeholder="R$ 29,90"></div>
+    </div>
+    <label class="f">Cupom (opcional)</label><input class="in" data-p="coupon" value="${esc(x.coupon||'')}" placeholder="Ex: MIGA10">
+    <div class="pimg-up"><div class="mini" style="${bgStyle(x.image_url)}"></div>
+      <label class="upbtn small">${x.image_url ? 'Trocar foto' : 'Foto do produto (opcional)'}<input type="file" accept="image/*" data-pimg></label>
+      ${x.image_url ? '<button class="linkbtn" data-a="rmimg">remover</button>' : ''}</div>
+  </div>`).join('');
+
+  el.querySelectorAll('.pcard').forEach(card => {
+    const i = +card.dataset.i, x = E.products[i];
+    card.querySelectorAll('[data-p]').forEach(inp => {
+      const upd = () => {
+        x[inp.dataset.p] = inp.value;
+        if(inp.dataset.p === 'url'){ const d = detectPlatform(inp.value); if(d){ x.platform = d; card.querySelector('[data-p=platform]').value = d; } }
+      };
+      inp.addEventListener('input', upd); inp.addEventListener('change', upd);
+    });
+    card.querySelectorAll('[data-a]').forEach(b => b.onclick = () => {
+      const a = b.dataset.a, P = E.products;
+      if(a === 'up') [P[i-1], P[i]] = [P[i], P[i-1]];
+      else if(a === 'down') [P[i+1], P[i]] = [P[i], P[i+1]];
+      else if(a === 'rm'){ if((x.name || x.url) && !confirm('Remover este produto?')) return; P.splice(i, 1); }
+      else if(a === 'rmimg') x.image_url = '';
+      renderProds();
+    });
+    card.querySelector('[data-pimg]').onchange = async e => {
+      const f = e.target.files[0]; if(!f) return;
+      toast('Enviando foto...');
+      try { x.image_url = await uploadImg(f, 'produtos', 600); renderProds(); toast('Foto adicionada!'); }
+      catch(err){ toast('Erro: ' + err.message); }
+    };
+  });
+}
+
+async function savePost(){
+  const num = parseInt(E.number, 10);
+  if(!num) return toast('Coloque o número do post');
+  const dup = S.posts.find(p => p.number === num && p.id !== E.id);
+  if(dup && !confirm(`Já existe um post nº ${num}. Salvar mesmo assim?`)) return;
+  const btn = document.getElementById('save'); btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    const row = {number:num, title:E.title||null, category:(E.category||'').trim()||null, cover_url:E.cover_url||null, instagram_url:E.instagram_url||null, active:!!E.active};
+    let id = E.id;
+    if(id){
+      const r = await sb.from('posts').update(row).eq('id', id); if(r.error) throw r.error;
+    } else {
+      const r = await sb.from('posts').insert(row).select('id').single(); if(r.error) throw r.error; id = r.data.id;
+    }
+    const prods = E.products.filter(x => (x.name||'').trim() || (x.url||'').trim()).map((x, i) => ({
+      id: x.id || crypto.randomUUID(), post_id:id, name:(x.name||'').trim() || 'Produto', url:(x.url||'').trim(),
+      platform:x.platform||'outro', price:x.price||null, coupon:(x.coupon||'').trim()||null, image_url:x.image_url||null, position:i
+    }));
+    const orig = (S.posts.find(p => p.id === id)?.products) || [];
+    const keep = new Set(prods.map(x => x.id));
+    const removed = orig.filter(x => !keep.has(x.id));
+    if(removed.length){
+      const r = await sb.from('products').delete().in('id', removed.map(x => x.id)); if(r.error) throw r.error;
+      removed.forEach(x => removeImg(x.image_url));
+    }
+    if(prods.length){ const r = await sb.from('products').upsert(prods); if(r.error) throw r.error; }
+    if(E._origCover && E._origCover !== E.cover_url) removeImg(E._origCover);
+    toast('Post salvo! ✨');
+    tab = 'posts';
+    await loadAdmin(); renderAdmin();
+  } catch(err){
+    toast('Erro ao salvar: ' + err.message);
+    btn.disabled = false; btn.textContent = 'Salvar post';
+  }
+}
+
+async function deletePost(){
+  if(!confirm(`Excluir o post ${E.number} e todos os links dele?`)) return;
+  const { error } = await sb.from('posts').delete().eq('id', E.id);
+  if(error) return toast('Erro: ' + error.message);
+  removeImg(E._origCover);
+  E.products.forEach(x => removeImg(x.image_url));
+  toast('Post excluído');
+  await loadAdmin(); renderAdmin();
+}
+
+route();
+</script>
+</body>
+</html>
