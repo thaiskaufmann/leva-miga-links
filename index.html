@@ -71,6 +71,30 @@ a{color:inherit}
 .price{color:var(--accent);font-weight:700;font-size:14px;margin-top:2px}
 .coupon{margin-top:6px;font-size:12px;background:#fff1f6;border:1px dashed var(--accent);padding:4px 8px;border-radius:8px;text-align:left}
 .buy{background:var(--accent);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:10px 14px;border-radius:999px;flex-shrink:0}
+.feed-head{display:none}
+@media (min-width:900px){
+  .pub{max-width:1200px;padding:40px 32px 64px;display:grid;grid-template-columns:340px minmax(0,1fr);grid-template-areas:"hero feed" "foot feed";grid-template-rows:auto 1fr;column-gap:48px;align-items:start}
+  .hero{grid-area:hero;position:sticky;top:32px;background:#fff;border:1px solid var(--line);border-radius:28px;padding:72px 24px 28px;overflow:hidden;box-shadow:0 18px 40px -24px rgba(120,20,60,.35)}
+  .hero::before{left:0;right:0;height:116px;border-radius:0}
+  .avatar{width:120px;height:120px}
+  .hero h1{font-size:30px}
+  .foot{grid-area:foot;margin-top:20px;padding:0 12px}
+  .feed{grid-area:feed;min-width:0}
+  .feed-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .feed-title{font-family:Fraunces,serif;font-size:32px;font-weight:800;line-height:1.1}
+  .feed-sub{color:var(--muted);font-size:14px}
+  .searchbar{margin-top:0}
+  .grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px}
+  .tile{border-radius:16px;transition:transform .2s,box-shadow .2s}
+  .tile:hover{transform:translateY(-4px);box-shadow:0 16px 30px -18px rgba(120,20,60,.55)}
+  .num{top:10px;left:10px;font-size:14px}
+  .sheet-wrap{align-items:center;padding:24px}
+  .sheet{max-width:540px;max-height:84vh;border-radius:24px;padding:24px 22px 26px}
+  .buy:hover{filter:brightness(1.1)}
+  .adm{max-width:720px}
+}
+@media (min-width:1300px){ .grid{grid-template-columns:repeat(5,minmax(0,1fr))} }
+@media (prefers-reduced-motion:reduce){ .tile,.sheet,.sheet-wrap{transition:none;animation:none} }
 @keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 
@@ -264,9 +288,12 @@ function renderPublic(){
         ${st.instagram_url ? `<a class="btn btn-ghost" href="${esc(safeUrl(st.instagram_url))}" target="_blank" rel="noopener">Instagram</a>` : ''}
       </div>
     </header>
-    <div class="searchbar"><input id="q" type="search" inputmode="search" placeholder="🔎 Busque pelo nº do post ou produto" value="${esc(S.q)}"></div>
-    ${cats.length > 2 ? `<div class="chips">${cats.map(c => `<button class="chip ${c===S.cat?'on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}</div>` : ''}
-    <section id="grid" class="grid"></section>
+    <section class="feed">
+      <div class="feed-head"><h2 class="feed-title">Achadinhos por post</h2><p class="feed-sub">${S.posts.length} post${S.posts.length===1?'':'s'} · clique na foto pra ver os links</p></div>
+      <div class="searchbar"><input id="q" type="search" inputmode="search" placeholder="🔎 Busque pelo nº do post ou produto" value="${esc(S.q)}"></div>
+      ${cats.length > 2 ? `<div class="chips">${cats.map(c => `<button class="chip ${c===S.cat?'on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}</div>` : ''}
+      <div id="grid" class="grid"></div>
+    </section>
     ${st.footer ? `<footer class="foot">${esc(st.footer)}</footer>` : ''}
   </main>`;
   document.getElementById('q').addEventListener('input', e => { S.q = e.target.value; renderGrid(); });
