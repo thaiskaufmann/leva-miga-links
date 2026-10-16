@@ -54,12 +54,17 @@ a{color:inherit}
 .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:32px;line-height:1.5}
 
 .sheet-wrap{position:fixed;inset:0;background:rgba(30,10,20,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;animation:fade .2s}
-.sheet{background:var(--bg);width:100%;max-width:560px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:24px 24px 0 0;padding:20px 16px calc(24px + env(safe-area-inset-bottom));position:relative;animation:up .25s ease-out}
-.close{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:#fff;font-size:22px;line-height:1;border:1px solid var(--line)}
-.sheet-head{display:flex;gap:14px;align-items:center;margin-bottom:16px;padding-right:40px}
-.sheet-head img{width:72px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:85vh;max-height:88dvh;display:flex;flex-direction:column;overflow:hidden;border-radius:24px 24px 0 0;position:relative;animation:up .25s ease-out}
+.sheet-top{flex-shrink:0;padding:8px 16px 12px;border-bottom:1px solid var(--line);background:var(--bg)}
+.grab{display:block;width:44px;height:5px;border-radius:99px;background:var(--line);margin:0 auto 10px}
+.sheet-row{display:flex;gap:12px;align-items:center}
+.close{flex-shrink:0;width:42px;height:42px;border-radius:50%;background:#fff;font-size:24px;line-height:1;border:1.5px solid var(--line);color:var(--ink);display:grid;place-items:center}
+.sheet-head{display:flex;gap:12px;align-items:center;flex:1;min-width:0}
+.sheet-head img{width:54px;height:68px;object-fit:cover;border-radius:10px;flex-shrink:0}
+.sheet-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:14px 16px}
+.sheet-bottom{flex-shrink:0;padding:10px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bg)}
 .badge{display:inline-block;background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
-.sheet-head h2{font-family:Fraunces,serif;font-size:20px;margin-top:6px;line-height:1.2}
+.sheet-head h2{font-family:Fraunces,serif;font-size:18px;margin-top:4px;line-height:1.2;overflow-wrap:anywhere}
 .small-link{font-size:13px;color:var(--muted);display:inline-block;margin-top:4px}
 .prods{list-style:none;display:flex;flex-direction:column;gap:10px}
 .prod{display:flex;gap:12px;align-items:center;background:#fff;border-radius:16px;padding:10px;border:1px solid var(--line)}
@@ -89,7 +94,12 @@ a{color:inherit}
   .tile:hover{transform:translateY(-4px);box-shadow:0 16px 30px -18px rgba(120,20,60,.55)}
   .num{top:10px;left:10px;font-size:14px}
   .sheet-wrap{align-items:center;padding:24px}
-  .sheet{max-width:540px;max-height:84vh;border-radius:24px;padding:24px 22px 26px}
+  .sheet{max-width:540px;max-height:84vh;border-radius:24px}
+  .grab{display:none}
+  .sheet-top{padding:16px 20px}
+  .sheet-body{padding:16px 20px}
+  .sheet-bottom{padding:12px 20px 16px}
+  .sheet-head img{width:64px;height:80px}
   .buy:hover{filter:brightness(1.1)}
   .adm{max-width:720px}
 }
@@ -343,25 +353,41 @@ function prodItem(x, i){
 
 function openPost(id){
   const p = S.posts.find(x => x.id === id); if(!p) return;
-  history.replaceState(null, '', '?post=' + p.number);
+  try { history.pushState({sheet:1}, '', '?post=' + p.number); } catch(e){}
   const el = document.createElement('div');
   el.className = 'sheet-wrap';
-  el.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">
-    <button class="close" aria-label="Fechar">×</button>
-    <div class="sheet-head">
-      ${p.cover_url ? `<img src="${esc(p.cover_url)}" alt="">` : ''}
-      <div><span class="badge">Post ${p.number}</span>
-        <h2>${esc(p.title || 'Achadinhos')}</h2>
-        ${p.instagram_url ? `<a class="small-link" href="${esc(safeUrl(p.instagram_url))}" target="_blank" rel="noopener">Ver post no Instagram ↗</a>` : ''}
+  el.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Links do post ${p.number}">
+    <div class="sheet-top">
+      <span class="grab"></span>
+      <div class="sheet-row">
+        <div class="sheet-head">
+          ${p.cover_url ? `<img src="${esc(p.cover_url)}" alt="">` : ''}
+          <div><span class="badge">Post ${p.number}</span>
+            <h2>${esc(p.title || 'Achadinhos')}</h2>
+            ${p.instagram_url ? `<a class="small-link" href="${esc(safeUrl(p.instagram_url))}" target="_blank" rel="noopener">Ver post no Instagram ↗</a>` : ''}
+          </div>
+        </div>
+        <button class="close" aria-label="Fechar">×</button>
       </div>
     </div>
-    <ul class="prods">${p.products.map(prodItem).join('') || '<li class="empty">Links em breve! 💕</li>'}</ul>
+    <div class="sheet-body"><ul class="prods">${p.products.map(prodItem).join('') || '<li class="empty">Links em breve! 💕</li>'}</ul></div>
+    <div class="sheet-bottom"><button class="btn btn-ghost full back">← Voltar aos posts</button></div>
   </div>`;
   document.body.appendChild(el);
   document.body.style.overflow = 'hidden';
-  const close = () => { el.remove(); document.body.style.overflow = ''; history.replaceState(null, '', location.pathname); };
+  let closed = false;
+  const close = () => {
+    if(closed) return; closed = true;
+    el.remove(); document.body.style.overflow = '';
+    document.removeEventListener('keydown', onKey); window.removeEventListener('popstate', close);
+    history.replaceState(null, '', location.pathname);
+  };
+  const onKey = e => { if(e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  window.addEventListener('popstate', close);
   el.addEventListener('click', e => { if(e.target === el) close(); });
   el.querySelector('.close').onclick = close;
+  el.querySelector('.back').onclick = close;
   el.querySelectorAll('[data-click]').forEach(a => a.addEventListener('click', () => { sb.rpc('increment_click', {pid: a.dataset.click}).then(() => {}); }));
   el.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => {
     try { await navigator.clipboard.writeText(b.dataset.copy); toast('Cupom copiado! 🎉'); }
